@@ -1,0 +1,11 @@
+STUDYFLOW - IntelliJ IDEA
+
+1. Extract/open the studyflow folder in IntelliJ IDEA.
+2. Choose JDK 17+ for the project.
+3. Open pom.xml and let IntelliJ import Maven dependencies.
+4. Run src/main/java/com/studyflow/Main.java.
+   OR run the Maven goal: javafx:run
+
+The app starts maximized and remains resizable.
+SQLite database is created automatically under the user's home folder:
+~/.studyflow/studyflow.db
