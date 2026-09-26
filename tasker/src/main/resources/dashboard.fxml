@@ -1,0 +1,601 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane fx:id="root"
+           xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.studyapp.DashboardController"
+           maxWidth="Infinity"
+           maxHeight="Infinity">
+
+    <!-- =====================================================
+         LOGIN SCREEN
+         ===================================================== -->
+
+    <VBox fx:id="loginScreen"
+          alignment="CENTER"
+          maxWidth="400"
+          spacing="18"
+          styleClass="login-card">
+
+        <Label text="StudyFlow"
+               styleClass="app-title"/>
+
+        <Label text="Study smarter. Stay organized."
+               styleClass="subtitle"/>
+
+        <TextField fx:id="loginUsernameField"
+                   promptText="Username"
+                   styleClass="input"/>
+
+        <PasswordField fx:id="loginPasswordField"
+                       promptText="Password"
+                       styleClass="input"/>
+
+        <Button text="Login"
+                maxWidth="Infinity"
+                styleClass="primary-button"
+                onAction="#handleLogin"/>
+
+        <Button text="Create New Account"
+                maxWidth="Infinity"
+                styleClass="secondary-button"
+                onAction="#showRegister"/>
+
+        <Label fx:id="loginMessage"
+               styleClass="error-label"/>
+
+    </VBox>
+
+
+    <!-- =====================================================
+         REGISTER SCREEN
+         ===================================================== -->
+
+    <VBox fx:id="registerScreen"
+          alignment="CENTER"
+          maxWidth="400"
+          spacing="18"
+          styleClass="login-card"
+          visible="false"
+          managed="false">
+
+        <Label text="Create Your Account"
+               styleClass="app-title"/>
+
+        <TextField fx:id="registerUsernameField"
+                   promptText="Username"
+                   styleClass="input"/>
+
+        <PasswordField fx:id="registerPasswordField"
+                       promptText="Password"
+                       styleClass="input"/>
+
+        <PasswordField fx:id="confirmPasswordField"
+                       promptText="Confirm Password"
+                       styleClass="input"/>
+
+        <Button text="Create Account"
+                maxWidth="Infinity"
+                styleClass="primary-button"
+                onAction="#handleRegister"/>
+
+        <Button text="Back to Login"
+                maxWidth="Infinity"
+                styleClass="secondary-button"
+                onAction="#backToLogin"/>
+
+        <Label fx:id="registerMessage"
+               styleClass="error-label"/>
+
+    </VBox>
+
+
+    <!-- =====================================================
+         MAIN DASHBOARD
+         ===================================================== -->
+
+    <BorderPane fx:id="dashboardScreen"
+                visible="false"
+                managed="false"
+                maxWidth="Infinity"
+                maxHeight="Infinity"
+                styleClass="main-background">
+
+
+        <!-- =================================================
+             HEADER
+             ================================================= -->
+
+        <top>
+
+            <HBox spacing="20"
+                  alignment="CENTER_LEFT"
+                  styleClass="top-header">
+
+                <Label text="StudyFlow"
+                       styleClass="logo"/>
+
+                <Label fx:id="welcomeLabel"
+                       text="Welcome back"
+                       styleClass="welcome-text"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button text="Logout"
+                        styleClass="logout-button"
+                        onAction="#handleLogout"/>
+
+            </HBox>
+
+        </top>
+
+
+        <!-- =================================================
+             TABS
+             ================================================= -->
+
+        <center>
+
+            <TabPane styleClass="main-tabs"
+                     maxWidth="Infinity"
+                     maxHeight="Infinity">
+
+
+                <!-- =========================================
+                     DASHBOARD TAB
+                     ========================================= -->
+
+                <Tab text="  Dashboard  "
+                     closable="false">
+
+                    <content>
+
+                        <ScrollPane fitToWidth="true"
+                                    fitToHeight="true">
+
+                            <content>
+
+                                <VBox spacing="18">
+
+                                    <padding>
+                                        <Insets top="25"
+                                                right="25"
+                                                bottom="25"
+                                                left="25"/>
+                                    </padding>
+
+
+                                    <Label text="Your Study Overview"
+                                           styleClass="page-title"/>
+
+                                    <Label text="Keep track of your tasks and study progress."
+                                           styleClass="page-subtitle"/>
+
+
+                                    <!-- STATISTICS -->
+
+                                    <HBox spacing="15">
+
+                                        <!-- TOTAL TASKS -->
+
+                                        <VBox spacing="8"
+                                              styleClass="stat-card"
+                                              HBox.hgrow="ALWAYS">
+
+                                            <padding>
+                                                <Insets top="18"
+                                                        right="18"
+                                                        bottom="18"
+                                                        left="18"/>
+                                            </padding>
+
+                                            <Label text="📋"
+                                                   styleClass="stat-icon"/>
+
+                                            <Label text="Total Tasks"
+                                                   styleClass="stat-title"/>
+
+                                            <Label fx:id="totalTasksLabel"
+                                                   text="0"
+                                                   styleClass="stat-value"/>
+
+                                        </VBox>
+
+
+                                        <!-- COMPLETED -->
+
+                                        <VBox spacing="8"
+                                              styleClass="stat-card"
+                                              HBox.hgrow="ALWAYS">
+
+                                            <padding>
+                                                <Insets top="18"
+                                                        right="18"
+                                                        bottom="18"
+                                                        left="18"/>
+                                            </padding>
+
+                                            <Label text="✓"
+                                                   styleClass="stat-icon"/>
+
+                                            <Label text="Completed"
+                                                   styleClass="stat-title"/>
+
+                                            <Label fx:id="completedTasksLabel"
+                                                   text="0"
+                                                   styleClass="stat-value"/>
+
+                                        </VBox>
+
+
+                                        <!-- PENDING -->
+
+                                        <VBox spacing="8"
+                                              styleClass="stat-card"
+                                              HBox.hgrow="ALWAYS">
+
+                                            <padding>
+                                                <Insets top="18"
+                                                        right="18"
+                                                        bottom="18"
+                                                        left="18"/>
+                                            </padding>
+
+                                            <Label text="◷"
+                                                   styleClass="stat-icon"/>
+
+                                            <Label text="Pending"
+                                                   styleClass="stat-title"/>
+
+                                            <Label fx:id="pendingTasksLabel"
+                                                   text="0"
+                                                   styleClass="stat-value"/>
+
+                                        </VBox>
+
+
+                                        <!-- OVERDUE -->
+
+                                        <VBox spacing="8"
+                                              styleClass="stat-card"
+                                              HBox.hgrow="ALWAYS">
+
+                                            <padding>
+                                                <Insets top="18"
+                                                        right="18"
+                                                        bottom="18"
+                                                        left="18"/>
+                                            </padding>
+
+                                            <Label text="!"
+                                                   styleClass="stat-icon"/>
+
+                                            <Label text="Overdue"
+                                                   styleClass="stat-title"/>
+
+                                            <Label fx:id="overdueTasksLabel"
+                                                   text="0"
+                                                   styleClass="stat-value"/>
+
+                                        </VBox>
+
+
+                                        <!-- STUDY MINUTES -->
+
+                                        <VBox spacing="8"
+                                              styleClass="stat-card"
+                                              HBox.hgrow="ALWAYS">
+
+                                            <padding>
+                                                <Insets top="18"
+                                                        right="18"
+                                                        bottom="18"
+                                                        left="18"/>
+                                            </padding>
+
+                                            <Label text="◉"
+                                                   styleClass="stat-icon"/>
+
+                                            <Label text="Study Minutes"
+                                                   styleClass="stat-title"/>
+
+                                            <Label fx:id="studyMinutesLabel"
+                                                   text="0"
+                                                   styleClass="stat-value"/>
+
+                                        </VBox>
+
+                                    </HBox>
+
+
+                                    <!-- PROGRESS -->
+
+                                    <VBox spacing="12"
+                                          styleClass="content-card">
+
+                                        <Label text="Task Completion Progress"
+                                               styleClass="section-title"/>
+
+                                        <HBox spacing="15"
+                                              alignment="CENTER_LEFT">
+
+                                            <ProgressBar fx:id="progressBar"
+                                                         progress="0"
+                                                         minHeight="22"
+                                                         prefHeight="22"
+                                                         maxHeight="22"
+                                                         HBox.hgrow="ALWAYS"/>
+
+                                            <Label fx:id="progressPercentageLabel"
+                                                   text="0%"
+                                                   styleClass="progress-percentage"/>
+
+                                        </HBox>
+
+                                    </VBox>
+
+
+                                    <!-- RECENT TASKS -->
+
+                                    <VBox spacing="10"
+                                          styleClass="content-card">
+
+                                        <Label text="Recent Tasks"
+                                               styleClass="section-title"/>
+
+                                        <ListView fx:id="recentTasksList"
+                                                  prefHeight="180"
+                                                  styleClass="task-list"/>
+
+                                    </VBox>
+
+
+                                    <!-- MOTIVATION -->
+
+                                    <VBox spacing="12"
+                                          styleClass="content-card">
+
+                                        <Label text="Daily Motivation"
+                                               styleClass="section-title"/>
+
+                                        <Label fx:id="quoteLabel"
+                                               text="Click below to get today's motivation."
+                                               wrapText="true"
+                                               styleClass="quote-label"/>
+
+                                        <Button fx:id="quoteButton"
+                                                text="Get Motivation"
+                                                styleClass="primary-button"
+                                                onAction="#loadQuote"/>
+
+                                    </VBox>
+
+                                </VBox>
+
+                            </content>
+
+                        </ScrollPane>
+
+                    </content>
+
+                </Tab>
+
+
+                <!-- =========================================
+                     TASKS TAB
+                     ========================================= -->
+
+                <Tab text="  My Tasks  "
+                     closable="false">
+
+                    <content>
+
+                        <VBox spacing="15">
+
+                            <padding>
+                                <Insets top="25"
+                                        right="25"
+                                        bottom="25"
+                                        left="25"/>
+                            </padding>
+
+                            <Label text="Task Management"
+                                   styleClass="page-title"/>
+
+                            <Label text="Create, edit and manage your study tasks."
+                                   styleClass="page-subtitle"/>
+
+
+                            <!-- TASK FORM -->
+
+                            <HBox spacing="10">
+
+                                <TextField fx:id="taskTitleField"
+                                           promptText="Task title"
+                                           styleClass="input"
+                                           HBox.hgrow="ALWAYS"/>
+
+                                <TextField fx:id="taskSubjectField"
+                                           promptText="Subject"
+                                           styleClass="input"
+                                           HBox.hgrow="ALWAYS"/>
+
+                                <ComboBox fx:id="priorityBox"
+                                          prefWidth="120"/>
+
+                                <DatePicker fx:id="dueDatePicker"
+                                            promptText="Due date"
+                                            prefWidth="150"/>
+
+                                <Button text="Add Task"
+                                        styleClass="primary-button"
+                                        onAction="#handleAddTask"/>
+
+                            </HBox>
+
+
+                            <!-- TASK LIST -->
+
+                            <ListView fx:id="taskList"
+                                      styleClass="task-list"
+                                      VBox.vgrow="ALWAYS"
+                                      onMouseClicked="#handleTaskSelection"/>
+
+
+                            <!-- TASK BUTTONS -->
+
+                            <HBox spacing="10">
+
+                                <Button text="Edit Selected"
+                                        styleClass="secondary-button"
+                                        onAction="#handleEditTask"/>
+
+                                <Button text="Mark Completed"
+                                        styleClass="success-button"
+                                        onAction="#handleCompleteTask"/>
+
+                                <Button text="Delete"
+                                        styleClass="danger-button"
+                                        onAction="#handleDeleteTask"/>
+
+                                <Button text="Refresh"
+                                        styleClass="secondary-button"
+                                        onAction="#refreshTasks"/>
+
+                            </HBox>
+
+                        </VBox>
+
+                    </content>
+
+                </Tab>
+
+
+                <!-- =========================================
+                     STUDY TIMER TAB
+                     ========================================= -->
+
+                <Tab text="  Study Timer  "
+                     closable="false">
+
+                    <content>
+
+                        <VBox alignment="CENTER"
+                              spacing="20">
+
+                            <padding>
+                                <Insets top="30"
+                                        right="30"
+                                        bottom="30"
+                                        left="30"/>
+                            </padding>
+
+
+                            <Label text="Study Timer"
+                                   styleClass="page-title"/>
+
+                            <Label text="Focus on one subject at a time."
+                                   styleClass="page-subtitle"/>
+
+
+                            <Label text="Subject"/>
+
+                            <ComboBox fx:id="studySubjectBox"
+                                      maxWidth="300"/>
+
+
+                            <TextField fx:id="customSubjectField"
+                                       promptText="Or enter custom subject"
+                                       maxWidth="300"
+                                       styleClass="input"/>
+
+
+                            <Label text="Study duration (minutes)"/>
+
+
+                            <TextField fx:id="minutesField"
+                                       text="25"
+                                       maxWidth="150"/>
+
+
+                            <Label fx:id="timerLabel"
+                                   text="25:00"
+                                   styleClass="timer-label"/>
+
+
+                            <HBox spacing="10"
+                                  alignment="CENTER">
+
+                                <Button text="Start Study"
+                                        styleClass="primary-button"
+                                        onAction="#handleStartStudy"/>
+
+                                <Button text="Stop"
+                                        styleClass="danger-button"
+                                        onAction="#handleStopTimer"/>
+
+                                <Button text="Reset"
+                                        styleClass="secondary-button"
+                                        onAction="#handleResetTimer"/>
+
+                            </HBox>
+
+                        </VBox>
+
+                    </content>
+
+                </Tab>
+
+
+                <!-- =========================================
+                     STUDY HISTORY TAB
+                     ========================================= -->
+
+                <Tab text="  Study History  "
+                     closable="false">
+
+                    <content>
+
+                        <VBox spacing="15">
+
+                            <padding>
+                                <Insets top="25"
+                                        right="25"
+                                        bottom="25"
+                                        left="25"/>
+                            </padding>
+
+                            <Label text="Study History"
+                                   styleClass="page-title"/>
+
+                            <Label text="Your completed study sessions."
+                                   styleClass="page-subtitle"/>
+
+
+                            <ListView fx:id="historyList"
+                                      styleClass="task-list"
+                                      VBox.vgrow="ALWAYS"/>
+
+
+                            <Button text="Refresh History"
+                                    styleClass="secondary-button"
+                                    onAction="#handleRefreshHistory"/>
+
+                        </VBox>
+
+                    </content>
+
+                </Tab>
+
+            </TabPane>
+
+        </center>
+
+    </BorderPane>
+
+</StackPane>
