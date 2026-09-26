@@ -1,13 +1,14 @@
 package com.studyapp;
 
-public class StudySession {
+public class StudySession extends StudyRecord implements Displayable {
 
-    private int id;
-    private int userId;
-    private String subject;
-    private int duration;
-    private String studyDate;
+    private final int duration;
+    private final String studyDate;
 
+
+    // =========================================================
+    // CONSTRUCTOR
+    // =========================================================
 
     public StudySession(
             int id,
@@ -16,28 +17,16 @@ public class StudySession {
             int duration,
             String studyDate) {
 
-        this.id = id;
-        this.userId = userId;
-        this.subject = subject;
+        super(id, userId, subject);
+
         this.duration = duration;
         this.studyDate = studyDate;
     }
 
 
-    public int getId() {
-        return id;
-    }
-
-
-    public int getUserId() {
-        return userId;
-    }
-
-
-    public String getSubject() {
-        return subject;
-    }
-
+    // =========================================================
+    // GETTERS
+    // =========================================================
 
     public int getDuration() {
         return duration;
@@ -49,13 +38,38 @@ public class StudySession {
     }
 
 
+    // =========================================================
+    // POLYMORPHIC METHOD
+    // =========================================================
+
+    @Override
+    public String getRecordType() {
+        return "Study Session";
+    }
+
+
+    // =========================================================
+    // INTERFACE METHOD
+    // =========================================================
+
+    @Override
+    public String getDisplayText() {
+
+        return getSubject()
+                + " | "
+                + duration
+                + " minutes"
+                + " | "
+                + studyDate;
+    }
+
+
+    // =========================================================
+    // TOSTRING
+    // =========================================================
+
     @Override
     public String toString() {
-
-        return subject +
-                "  •  " +
-                duration +
-                " minutes  •  " +
-                studyDate;
+        return getDisplayText();
     }
 }

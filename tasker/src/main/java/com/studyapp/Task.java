@@ -1,20 +1,12 @@
 package com.studyapp;
 
-public class Task {
-
-    private int id;
-    private int userId;
+public class Task extends StudyRecord implements Displayable {
 
     private String title;
-    private String subject;
     private String priority;
     private String status;
     private String dueDate;
 
-
-    // =========================================================
-    // CONSTRUCTOR
-    // =========================================================
 
     public Task(
             int id,
@@ -25,17 +17,15 @@ public class Task {
             String status,
             String dueDate) {
 
-        this.id = id;
-        this.userId = userId;
+        super(id, userId, subject);
+
         this.title = title;
-        this.subject = subject;
         this.priority = priority;
         this.status = status;
         this.dueDate = dueDate;
     }
 
 
-    // Constructor for creating a new task
     public Task(
             int userId,
             String title,
@@ -43,36 +33,17 @@ public class Task {
             String priority,
             String dueDate) {
 
-        this.userId = userId;
+        super(0, userId, subject);
+
         this.title = title;
-        this.subject = subject;
         this.priority = priority;
         this.status = "Pending";
         this.dueDate = dueDate;
     }
 
 
-    // =========================================================
-    // GETTERS
-    // =========================================================
-
-    public int getId() {
-        return id;
-    }
-
-
-    public int getUserId() {
-        return userId;
-    }
-
-
     public String getTitle() {
         return title;
-    }
-
-
-    public String getSubject() {
-        return subject;
     }
 
 
@@ -91,10 +62,6 @@ public class Task {
     }
 
 
-    // =========================================================
-    // SETTERS
-    // =========================================================
-
     public void setStatus(String status) {
         this.status = status;
     }
@@ -105,26 +72,85 @@ public class Task {
     }
 
 
-    // =========================================================
-    // DISPLAY
-    // =========================================================
+    @Override
+    public String getRecordType() {
+        return "Task";
+    }
+
+
+    @Override
+    public String getDisplayText() {
+
+        return title
+                + " | "
+                + getSubject()
+                + " | "
+                + priority
+                + " | "
+                + status
+                + " | Due: "
+                + dueDate;
+    }
+
 
     @Override
     public String toString() {
-
-        String dateText =
-                dueDate == null || dueDate.isEmpty()
-                        ? "No due date"
-                        : "Due: " + dueDate;
-
-        return title +
-                "  |  " +
-                subject +
-                "  |  " +
-                priority +
-                "  |  " +
-                status +
-                "  |  " +
-                dateText;
+        return getDisplayText();
     }
+}
+
+
+/*
+ * Interface
+ */
+interface Displayable {
+
+    String getDisplayText();
+}
+
+
+/*
+ * Abstract parent class
+ *
+ * StudyRecord now implements Displayable,
+ * so DashboardController can use:
+ *
+ * StudyRecord record
+ *
+ * and call getDisplayText().
+ */
+abstract class StudyRecord implements Displayable {
+
+    private final int id;
+    private final int userId;
+    private final String subject;
+
+
+    protected StudyRecord(
+            int id,
+            int userId,
+            String subject) {
+
+        this.id = id;
+        this.userId = userId;
+        this.subject = subject;
+    }
+
+
+    public int getId() {
+        return id;
+    }
+
+
+    public int getUserId() {
+        return userId;
+    }
+
+
+    public String getSubject() {
+        return subject;
+    }
+
+
+    public abstract String getRecordType();
 }

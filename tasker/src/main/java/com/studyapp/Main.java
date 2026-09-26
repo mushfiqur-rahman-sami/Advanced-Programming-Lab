@@ -2,6 +2,7 @@ package com.studyapp;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -12,43 +13,60 @@ public class Main extends Application {
 
         FXMLLoader loader =
                 new FXMLLoader(
-                        getClass().getResource(
-                                "/dashboard.fxml"
-                        )
+                        getClass().getResource("/dashboard.fxml")
                 );
+
+        Parent root = loader.load();
+
+        DashboardController controller =
+                loader.getController();
+
 
         Scene scene =
                 new Scene(
-                        loader.load(),
+                        root,
                         1200,
                         750
                 );
 
-        var css =
-                getClass().getResource(
-                        "/style.css"
-                );
 
-        if (css != null) {
-            scene.getStylesheets().add(
-                    css.toExternalForm()
-            );
-        }
-
-        primaryStage.setTitle(
-                "Study & Task Management System"
+        scene.getStylesheets().add(
+                getClass()
+                        .getResource("/style.css")
+                        .toExternalForm()
         );
 
-        primaryStage.setMinWidth(900);
-        primaryStage.setMinHeight(650);
-        primaryStage.setResizable(true);
+
+        primaryStage.setTitle(
+                "StudyFlow - Study Manager"
+        );
 
         primaryStage.setScene(scene);
+
+        primaryStage.setMinWidth(900);
+
+        primaryStage.setMinHeight(650);
+
+        primaryStage.setResizable(true);
+
+
+        /*
+         * Properly shut down the thread pool when
+         * the JavaFX application is closed.
+         */
+
+        primaryStage.setOnCloseRequest(event -> {
+
+            controller.shutdown();
+        });
+
 
         primaryStage.show();
     }
 
+
     public static void main(String[] args) {
+
         launch(args);
     }
 }

@@ -2,14 +2,16 @@ package com.studyapp;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Label;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DashboardController {
 
@@ -88,7 +90,6 @@ public class DashboardController {
     @FXML
     private Label studyMinutesLabel;
 
-
     @FXML
     private ProgressBar progressBar;
 
@@ -156,16 +157,40 @@ public class DashboardController {
 
 
     // =========================================================
-    // USER / TIMER VARIABLES
+    // USER VARIABLES
     // =========================================================
 
     private int currentUserId = -1;
 
     private String currentUsername = "";
 
-    private int remainingSeconds = 0;
 
-    private Thread timerThread;
+    // =========================================================
+    // CONCURRENCY VARIABLES
+    // =========================================================
+
+    /*
+     * ScheduledExecutorService creates and manages a thread pool.
+     *
+     * The same pool can execute both scheduled timer work
+     * and normal background API tasks.
+     */
+
+    private final ScheduledExecutorService executor =
+            Executors.newScheduledThreadPool(2);
+
+
+    private ScheduledFuture<?> timerFuture;
+
+
+    /*
+     * AtomicInteger makes access to the timer value safe
+     * between the background thread and JavaFX thread.
+     */
+
+    private final AtomicInteger remainingSeconds =
+            new AtomicInteger(0);
+
 
     private int currentStudyMinutes = 0;
 
@@ -180,6 +205,7 @@ public class DashboardController {
     public void initialize() {
 
         Database.initializeDatabase();
+
 
         priorityBox.getItems().addAll(
                 "High",
@@ -281,9 +307,9 @@ public class DashboardController {
                         .getText();
 
 
-        if (username.isEmpty() ||
-                password.isEmpty() ||
-                confirm.isEmpty()) {
+        if (username.isEmpty()
+                || password.isEmpty()
+                || confirm.isEmpty()) {
 
             registerMessage.setText(
                     "Please fill all fields."
@@ -357,8 +383,8 @@ public class DashboardController {
                         .getText();
 
 
-        if (username.isEmpty() ||
-                password.isEmpty()) {
+        if (username.isEmpty()
+                || password.isEmpty()) {
 
             loginMessage.setText(
                     "Please enter username and password."
@@ -381,9 +407,10 @@ public class DashboardController {
 
             currentUsername = username;
 
+
             welcomeLabel.setText(
-                    "Welcome back, " +
-                            currentUsername
+                    "Welcome back, "
+                            + currentUsername
             );
 
 
@@ -398,6 +425,7 @@ public class DashboardController {
 
 
             refreshAll();
+
         } else {
 
             loginMessage.setText(
@@ -461,16 +489,13 @@ public class DashboardController {
                 String.valueOf(stats[0])
         );
 
-
         completedTasksLabel.setText(
                 String.valueOf(stats[1])
         );
 
-
         pendingTasksLabel.setText(
                 String.valueOf(stats[2])
         );
-
 
         overdueTasksLabel.setText(
                 String.valueOf(stats[3])
@@ -509,9 +534,7 @@ public class DashboardController {
                 );
 
 
-        progressBar.setProgress(
-                progress
-        );
+        progressBar.setProgress(progress);
 
 
         int percentage =
@@ -537,7 +560,9 @@ public class DashboardController {
         }
 
 
-        recentTasksList.getItems().clear();
+        recentTasksList
+                .getItems()
+                .clear();
 
 
         List<Task> tasks =
@@ -590,8 +615,8 @@ public class DashboardController {
                         .toString();
 
 
-        if (title.isEmpty() ||
-                subject.isEmpty()) {
+        if (title.isEmpty()
+                || subject.isEmpty()) {
 
             showAlert(
                     "Please enter task title and subject."
@@ -657,8 +682,8 @@ public class DashboardController {
         );
 
 
-        if (selected.getDueDate() != null &&
-                !selected.getDueDate().isEmpty()) {
+        if (selected.getDueDate() != null
+                && !selected.getDueDate().isEmpty()) {
 
             try {
 
@@ -723,8 +748,8 @@ public class DashboardController {
                         .toString();
 
 
-        if (title.isEmpty() ||
-                subject.isEmpty()) {
+        if (title.isEmpty()
+                || subject.isEmpty()) {
 
             showAlert(
                     "Please enter task title and subject."
@@ -847,7 +872,9 @@ public class DashboardController {
         }
 
 
-        taskList.getItems().clear();
+        taskList
+                .getItems()
+                .clear();
 
 
         List<Task> tasks =
@@ -946,7 +973,7 @@ public class DashboardController {
 
 
     // =========================================================
-    // START TIMER
+    // START TIMER USING THREAD POOL
     // =========================================================
 
     private void startTimer(
@@ -960,67 +987,85 @@ public class DashboardController {
 
         currentStudySubject = subject;
 
-        remainingSeconds =
-                minutes * 60;
+
+        remainingSeconds.set(
+                minutes * 60
+        );
 
 
         updateTimerLabel();
 
 
-        timerThread =
-                new Thread(() -> {
+        /*
+         * Instead of creating:
+         *
+         * new Thread(...)
+         *
+         * the timer task is submitted to the
+         * ScheduledExecutorService thread pool.
+         */
 
-                    try {
+        timerFuture =
+                executor.scheduleAtFixedRate(
+                        () -> {
 
-                        while (remainingSeconds > 0) {
-
-                            Thread.sleep(1000);
-
-                            remainingSeconds--;
+                            int secondsLeft =
+                                    remainingSeconds.decrementAndGet();
 
 
                             Platform.runLater(
                                     this::updateTimerLabel
                             );
-                        }
 
 
-                        Platform.runLater(() -> {
+                            if (secondsLeft <= 0) {
 
-                            Database.addStudySession(
-                                    currentUserId,
-                                    currentStudySubject,
-                                    currentStudyMinutes
-                            );
+                                if (timerFuture != null) {
 
+                                    timerFuture.cancel(false);
 
-                            showAlert(
-                                    "Study session completed!\n\n"
-                                            + currentStudyMinutes
-                                            + " minutes of "
-                                            + currentStudySubject
-                                            + " saved to your history."
-                            );
+                                    timerFuture = null;
+                                }
 
 
-                            refreshDashboardStatistics();
+                                Platform.runLater(
+                                        this::studySessionCompleted
+                                );
+                            }
 
-                            refreshHistory();
-                        });
-
-
-                    } catch (InterruptedException e) {
-
-                        Thread.currentThread()
-                                .interrupt();
-                    }
-
-                });
+                        },
+                        1,
+                        1,
+                        TimeUnit.SECONDS
+                );
+    }
 
 
-        timerThread.setDaemon(true);
+    // =========================================================
+    // STUDY SESSION COMPLETED
+    // =========================================================
 
-        timerThread.start();
+    private void studySessionCompleted() {
+
+        Database.addStudySession(
+                currentUserId,
+                currentStudySubject,
+                currentStudyMinutes
+        );
+
+
+        showAlert(
+                "Study session completed!\n\n"
+                        + currentStudyMinutes
+                        + " minutes of "
+                        + currentStudySubject
+                        + " saved to your history."
+        );
+
+
+        refreshDashboardStatistics();
+
+        refreshHistory();
     }
 
 
@@ -1037,11 +1082,11 @@ public class DashboardController {
 
     private void stopTimer() {
 
-        if (timerThread != null) {
+        if (timerFuture != null) {
 
-            timerThread.interrupt();
+            timerFuture.cancel(true);
 
-            timerThread = null;
+            timerFuture = null;
         }
     }
 
@@ -1055,8 +1100,11 @@ public class DashboardController {
 
         stopTimer();
 
-        remainingSeconds =
-                25 * 60;
+
+        remainingSeconds.set(
+                25 * 60
+        );
+
 
         updateTimerLabel();
     }
@@ -1073,19 +1121,23 @@ public class DashboardController {
         }
 
 
-        int minutes =
-                remainingSeconds / 60;
-
-
         int seconds =
-                remainingSeconds % 60;
+                remainingSeconds.get();
+
+
+        int minutes =
+                seconds / 60;
+
+
+        int remaining =
+                seconds % 60;
 
 
         timerLabel.setText(
                 String.format(
                         "%02d:%02d",
                         minutes,
-                        seconds
+                        remaining
                 )
         );
     }
@@ -1102,16 +1154,34 @@ public class DashboardController {
         }
 
 
-        historyList.getItems().clear();
+        historyList
+                .getItems()
+                .clear();
+
+
+        List<StudySession> sessions =
+                Database.getStudyHistory(
+                        currentUserId
+                );
+
+
+        /*
+         * StudySession is a StudyRecord.
+         *
+         * This method demonstrates polymorphism:
+         * the object is handled through the abstract
+         * StudyRecord type.
+         */
+
+        for (StudySession session : sessions) {
+
+            processStudyRecord(session);
+        }
 
 
         historyList
                 .getItems()
-                .addAll(
-                        Database.getStudyHistory(
-                                currentUserId
-                        )
-                );
+                .addAll(sessions);
     }
 
 
@@ -1123,7 +1193,44 @@ public class DashboardController {
 
 
     // =========================================================
-    // API MOTIVATION
+    // POLYMORPHISM
+    // =========================================================
+
+    private void processStudyRecord(
+            StudyRecord record) {
+
+        /*
+         * getRecordType() is defined in the abstract
+         * StudyRecord class but implemented differently
+         * by Task and StudySession.
+         *
+         * Java decides at runtime which implementation
+         * should execute.
+         */
+
+        String type =
+                record.getRecordType();
+
+
+        String display =
+                record.getDisplayText();
+
+
+        /*
+         * The values are intentionally obtained through
+         * the parent type. This is runtime polymorphism.
+         */
+
+        if (type.isEmpty()
+                || display.isEmpty()) {
+
+            return;
+        }
+    }
+
+
+    // =========================================================
+    // API MOTIVATION USING THREAD POOL
     // =========================================================
 
     @FXML
@@ -1135,6 +1242,12 @@ public class DashboardController {
                 "Loading motivation..."
         );
 
+
+        /*
+         * JavaFX Task is still used for background work,
+         * but instead of creating a new Thread manually,
+         * it is submitted to the existing thread pool.
+         */
 
         javafx.concurrent.Task<String> apiTask =
                 new javafx.concurrent.Task<>() {
@@ -1169,17 +1282,33 @@ public class DashboardController {
 
             quoteButton.setDisable(false);
 
-            apiTask.getException()
-                    .printStackTrace();
+
+            if (apiTask.getException() != null) {
+
+                apiTask.getException()
+                        .printStackTrace();
+            }
         });
 
 
-        Thread apiThread =
-                new Thread(apiTask);
+        /*
+         * Thread pool executes the API task.
+         */
 
-        apiThread.setDaemon(true);
+        executor.submit(apiTask);
+    }
 
-        apiThread.start();
+
+    // =========================================================
+    // SHUTDOWN EXECUTOR
+    // =========================================================
+
+    public void shutdown() {
+
+        stopTimer();
+
+
+        executor.shutdownNow();
     }
 
 
